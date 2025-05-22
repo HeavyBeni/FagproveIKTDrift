@@ -1,5 +1,9 @@
-# Installer og konfigurer DNS Server (kjøres etter domenet er opprettet)
+# Installer DNS-server og verktøy
 Install-WindowsFeature DNS -IncludeManagementTools
 
-# Legg til en fremoversøkingssone for domenet (om ikke allerede opprettet av AD DS)
-Add-DnsServerPrimaryZone -Name "ullandtech.local" -ZoneFile "ullandtech.local.dns" -DynamicUpdate Secure
+# Opprett forward lookup zone hvis den ikke allerede finnes
+if (-not (Get-DnsServerZone -Name "edutech.local" -ErrorAction SilentlyContinue)) {
+    Add-DnsServerPrimaryZone -Name "edutech.local" -ZoneFile "edutech.local.dns" -DynamicUpdate Secure
+} else {
+    Write-Host "Zonen 'edutech.local' eksisterer allerede – hopper over opprettelse."
+}

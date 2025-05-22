@@ -13,48 +13,54 @@ variable "location" {
   default     = "westeurope"
 }
 
+variable "domain_controller" {
+  description = "Navn på Windows Server#1"
+  default = "EduTech"
+}
+
 variable "resource_group_name" {
   description = "Navn på ressursgruppe"
-  default     = "UllandTech-RG"
+  default     = "EduTech-RG"
 }
 
 variable "project_name" {
   description = "Navn på prosjekt (for navngiving)"
-  default     = "UllandTech"
+  default     = "EduTech"
 }
 
 variable "vnet_name" {
   description = "Navn på Virtual Network"
-  default     = "ullandtech-vnet"
+  default     = "EduTech-vnet"
 }
 
 variable "address_space" {
   description = "Adresseområde for VNet"
-  default     = ["10.0.0.0/16"]
+  default     = ["192.168.0.0/16"]
 }
 
-variable "subnet_name" {
-  description = "Navn på subnet"
-  default     = "ullandtech-subnet"
-}
 
-variable "subnet_prefix" {
+variable "server_subnet_prefix" {
   description = "Adresseområde for subnet"
-  default     = "10.0.1.0/24"
+  default     = "192.168.10.0/24"
+}
+
+variable "client_subnet_prefix" {
+  description = "Adresseområde for subnet"
+  default     = "192.168.20.0/24"
+}
+
+variable "guest_subnet_prefix" {
+  description = "Adresseområde for subnet"
+  default     = "192.168.30.0/24"
 }
 
 variable "admin_username" {
   description = "Administrator brukernavn for VM"
-  default     = "ullandadmin"
+  default     = "ETAdministrator"
 }
 
 variable "admin_password" {
   description = "Administrator passord for VM (bør hentes fra secrets)"
   type        = string
   sensitive   = true
-}
-
-variable "my_public_ip" {
-  description = "Din offentlige IP-adresse for RDP-tilgang"
-  type        = string
 }

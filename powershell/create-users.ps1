@@ -1,31 +1,41 @@
-# Opprett OU-struktur og grupper i AD
 Import-Module ActiveDirectory
 
 # OU-struktur
-New-ADOrganizationalUnit -Name "UllandTech" -ProtectedFromAccidentalDeletion $false
-New-ADOrganizationalUnit -Name "Administrasjon" -Path "OU=UllandTech,DC=ullandtech,DC=local"
-New-ADOrganizationalUnit -Name "Konsulenttjenester" -Path "OU=UllandTech,DC=ullandtech,DC=local"
-New-ADOrganizationalUnit -Name "IKT-Drift" -Path "OU=UllandTech,DC=ullandtech,DC=local"
+New-ADOrganizationalUnit -Name "EduTech" -ProtectedFromAccidentalDeletion $false
+New-ADOrganizationalUnit -Name "b-Administrasjon" -Path "OU=EduTech,DC=Edutech,DC=local"
+New-ADOrganizationalUnit -Name "b-Konsulenttjenester" -Path "OU=EduTech,DC=Edutech,DC=local"
+New-ADOrganizationalUnit -Name "b-Salgsavdeling" -Path "OU=EduTech,DC=Edutech,DC=local"
+New-ADOrganizationalUnit -Name "b-IKT-Service" -Path "OU=EduTech,DC=Edutech,DC=local"
 
-# Grupper
-New-ADGroup -Name "Administrasjon" -GroupScope Global -Path "OU=Administrasjon,OU=UllandTech,DC=ullandtech,DC=local"
-New-ADGroup -Name "Konsulenttjenester" -GroupScope Global -Path "OU=Konsulenttjenester,OU=UllandTech,DC=ullandtech,DC=local"
-New-ADGroup -Name "IKT-Drift" -GroupScope Global -Path "OU=IKT-Drift,OU=UllandTech,DC=ullandtech,DC=local"
+# Sikkerhetsgrupper
+New-ADGroup -Name "b-SG_Admin" -GroupScope Global -Path "OU=Administrasjon,OU=EduTech,DC=Edutech,DC=local"
+New-ADGroup -Name "b-SG_Konsulent" -GroupScope Global -Path "OU=Konsulenttjenester,OU=EduTech,DC=Edutech,DC=local"
+New-ADGroup -Name "b-SG_Salg" -GroupScope Global -Path "OU=Salgsavdeling,OU=EduTech,DC=Edutech,DC=local"
+New-ADGroup -Name "b-SG_IKT" -GroupScope Global -Path "OU=IKT-Service,OU=EduTech,DC=Edutech,DC=local"
+New-ADGroup -Name "b-SG_Felles" -GroupScope Global -Path "OU=EduTech,DC=Edutech,DC=local"
+New-ADGroup -Name "b-SG_Ledelse" -GroupScope Global -Path "OU=EduTech,DC=Edutech,DC=local"
 
 # Brukere
-1..3 | ForEach-Object {
-    New-ADUser -Name "AdminBruker$_" -SamAccountName "admin$_" -UserPrincipalName "admin$_@ullandtech.local" -Path "OU=Administrasjon,OU=UllandTech,DC=ullandtech,DC=local" -AccountPassword (ConvertTo-SecureString "Start1234!" -AsPlainText -Force) -Enabled $true
-    Add-ADGroupMember -Identity "Administrasjon" -Members "admin$_"
+$root = "DC=Edutech,DC=local"
+
+$users = @(
+    @{ Name = "Daglig Leder"; UserName = "daglig.leder"; OU = "OU=Administrasjon,OU=EduTech,$root"; Group = "SG_Admin" },
+    @{ Name = "Økonomiansvarlig"; UserName = "okonomi.ansvarlig"; OU = "OU=Administrasjon,OU=EduTech,$root"; Group = "SG_Admin" },
+    @{ Name = "Salg- og Markedsansvarlig"; UserName = "salg.marked"; OU = "OU=Salgsavdeling,OU=EduTech,$root"; Group = "SG_Salg" },
+    @{ Name = "Seniorkonsulent IKT"; UserName = "seniorkonsulent.ikt"; OU = "OU=Konsulenttjenester,OU=EduTech,$root"; Group = "SG_Konsulent" },
+    @{ Name = "Konsulent IKT 1"; UserName = "konsulent1.ikt"; OU = "OU=Konsulenttjenester,OU=EduTech,$root"; Group = "SG_Konsulent" },
+    @{ Name = "Konsulent IKT 2"; UserName = "konsulent2.ikt"; OU = "OU=Konsulenttjenester,OU=EduTech,$root"; Group = "SG_Konsulent" },
+    @{ Name = "Key Account Manager"; UserName = "key.account"; OU = "OU=Salgsavdeling,OU=EduTech,$root"; Group = "SG_Salg" },
+    @{ Name = "Selger 1"; UserName = "selger1"; OU = "OU=Salgsavdeling,OU=EduTech,$root"; Group = "SG_Salg" },
+    @{ Name = "Selger 2"; UserName = "selger2"; OU = "OU=Salgsavdeling,OU=EduTech,$root"; Group = "SG_Salg" },
+    @{ Name = "IKT-drift Ansvarlig"; UserName = "ikt.ansvarlig"; OU = "OU=IKT-Service,OU=EduTech,$root"; Group = "SG_IKT" },
+    @{ Name = "IKT-drift Lærling"; UserName = "ikt.laerling"; OU = "OU=IKT-Service,OU=EduTech,$root"; Group = "SG_IKT" }
+)
+
+foreach ($u in $users) {
+    if (-not (Get-ADUser -Filter "SamAccountName -eq '$($u.UserName)'" -ErrorAction SilentlyContinue)) {
+        New-ADUser -Name $u.Name -SamAccountName $u.UserName -UserPrincipalName "$($u.UserName)@edutech.local" `
+            -Path $u.OU -AccountPassword (ConvertTo-SecureString "Start1234!" -AsPlainText -Force) -Enabled $true
+        Add-ADGroupMember -Identity $u.Group -Members $u.UserName
+    }
 }
-
-1..10 | ForEach-Object {
-    New-ADUser -Name "KonsulentBruker$_" -SamAccountName "konsulent$_" -UserPrincipalName "konsulent$_@ullandtech.local" -Path "OU=Konsulenttjenester,OU=UllandTech,DC=ullandtech,DC=local" -AccountPassword (ConvertTo-SecureString "Start1234!" -AsPlainText -Force) -Enabled $true
-    Add-ADGroupMember -Identity "Konsulenttjenester" -Members "konsulent$_"
-}
-
-1..2 | ForEach-Object {
-    New-ADUser -Name "DriftBruker$_" -SamAccountName "drift$_" -UserPrincipalName "drift$_@ullandtech.local" -Path "OU=IKT-Drift,OU=UllandTech,DC=ullandtech,DC=local" -AccountPassword (ConvertTo-SecureString "Start1234!" -AsPlainText -Force) -Enabled $true
-    Add-ADGroupMember -Identity "IKT-Drift" -Members "drift$_"
-}
-
-

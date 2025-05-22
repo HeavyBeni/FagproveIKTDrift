@@ -10,6 +10,14 @@ output "vnet_name" {
   value = azurerm_virtual_network.vnet.name
 }
 
-output "subnet_id" {
-  value = azurerm_subnet.subnet.id
+output "server_subnet" {
+  value = azurerm_subnet.server_subnet
+}
+
+output "client_subnet" {
+  value = azurerm_subnet.client_subnet
+}
+
+output "guest_subnet" {
+  value = azurerm_subnet.guest_subnet
 }
